@@ -1,0 +1,98 @@
+<html>
+<style>
+    #myElement-1 {
+        background: silver;
+        height: 300px;
+        width: 300px;
+        text-align: center;
+        font: 30px/300px Helvetica, Arial, sans-serif;
+        top: 0px;
+        left: 0px;
+        position: absolute;
+    }
+</style>
+
+<body>
+    <script src="https://hammerjs.github.io/dist/hammer.js"></script>
+
+    <div id="myElement-1"></div>
+
+    <script>
+        const elemState = {}
+        const elem = document.getElementById('myElement-1');
+        datainit(elem);
+
+        var mc = new Hammer(elem);
+        mc.get('pan').set({ direction: Hammer.DIRECTION_ALL });
+        mc.get('pinch').set({ enable: true });
+
+        mc.on('panstart', handlePanMove);
+        mc.on('panmove', handlePanMove);
+        mc.on('panend', handlePanEnd);
+
+        mc.on('pinchstart', handlePinchMove);
+        mc.on('pinchmove', handlePinchMove);
+        mc.on('pinchend', handlePinchEnd);
+
+        mc.on('doubletap', handleDoubleTap);
+
+        function handlePanMove(ev) {
+            elemState[elem.id] = {
+                ...elemState[elem.id],
+                deltaX: ev.deltaX,
+                deltaY: ev.deltaY,
+            }
+            transform(elem);
+        }
+        function handlePanEnd(ev) {
+            elemState[elem.id] = {
+                ...elemState[elem.id],
+                x: elemState[elem.id].x + ev.deltaX,
+                y: elemState[elem.id].y + ev.deltaY,
+                deltaX: 0,
+                deltaY: 0,
+            }
+            transform(elem);
+        }
+
+        function handlePinchMove(ev) {
+            elemState[elem.id] = {
+                ...elemState[elem.id],
+                deltaScale: ev.scale,
+            }
+            transform(elem)
+        }
+        function handlePinchEnd(ev) {
+            elemState[elem.id] = {
+                ...elemState[elem.id],
+                scale: elemState[elem.id].scale * ev.scale,
+                deltaScale: 1,
+            }
+            transform(elem)
+        }
+
+        function handleDoubleTap(ev) {
+            datainit(elem);
+            transform(elem);
+        }
+
+        function datainit(e) {
+            elemState[e.id] = {
+                x: 0,
+                y: 0,
+                deltaX: 0,
+                deltaY: 0,
+                scale: 1,
+                deltaScale: 1,
+            }
+        }
+        function transform(e) {
+            const { x, y, deltaX, deltaY, scale, deltaScale } = elemState[e.id];
+            elem.style.transform = `translate(${x + deltaX}px, ${y + deltaY}px) scale(${scale * deltaScale})`
+        }
+
+
+    </script>
+</body>
+
+</html>
